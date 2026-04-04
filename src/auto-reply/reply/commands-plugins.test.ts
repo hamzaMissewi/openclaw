@@ -10,7 +10,7 @@ import { buildCommandTestParams } from "./commands.test-harness.js";
 const workspaceHarness = createCommandWorkspaceHarness("openclaw-command-plugins-");
 
 async function createClaudeBundlePlugin(params: { workspaceDir: string; pluginId: string }) {
-  const pluginDir = path.join(params.workspaceDir, ".openclaw", "extensions", params.pluginId);
+  const pluginDir = path.join(params.workspaceDir, ".openclaw", "plugins", params.pluginId);
   await fs.mkdir(path.join(pluginDir, ".claude-plugin"), { recursive: true });
   await fs.mkdir(path.join(pluginDir, "commands"), { recursive: true });
   await fs.writeFile(

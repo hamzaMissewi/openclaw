@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import path from "node:path";
 import { resolveConfigDir, resolveUserPath } from "../utils.js";
 import { resolveBundledPluginsDir } from "./bundled-dir.js";
@@ -13,6 +14,18 @@ export type PluginCacheInputs = {
   loadPaths: string[];
 };
 
+function selectPluginDir(baseDir: string): string {
+  const pluginsPath = path.join(baseDir, "plugins");
+  const extensionsPath = path.join(baseDir, "extensions");
+  if (fs.existsSync(pluginsPath)) {
+    return pluginsPath;
+  }
+  if (fs.existsSync(extensionsPath)) {
+    return extensionsPath;
+  }
+  return pluginsPath; // Default to 'plugins'
+}
+
 export function resolvePluginSourceRoots(params: {
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
@@ -20,10 +33,12 @@ export function resolvePluginSourceRoots(params: {
   const env = params.env ?? process.env;
   const workspaceRoot = params.workspaceDir ? resolveUserPath(params.workspaceDir, env) : undefined;
   const stock = resolveBundledPluginsDir(env);
-  const global = path.join(resolveConfigDir(env), "extensions");
-  const workspace = workspaceRoot ? path.join(workspaceRoot, ".openclaw", "extensions") : undefined;
+  const configDir = resolveConfigDir(env);
+  const global = selectPluginDir(configDir);
+  const workspace = workspaceRoot ? selectPluginDir(path.join(workspaceRoot, ".openclaw")) : undefined;
   return { stock, global, workspace };
 }
+
 
 // Shared env-aware cache inputs for discovery, manifest, and loader caches.
 export function resolvePluginCacheInputs(params: {

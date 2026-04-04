@@ -24,7 +24,7 @@ describe("normalizeInboundTextNewlines", () => {
   });
 });
 
-describe("inbound context contract (providers + extensions)", () => {
+describe("inbound context contract (providers + plugins)", () => {
   const cases: Array<{ name: string; ctx: MsgContext }> = [
     {
       name: "whatsapp group",

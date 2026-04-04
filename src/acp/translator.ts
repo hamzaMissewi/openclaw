@@ -955,11 +955,20 @@ export class AcpGatewayAgent implements Agent {
       return;
     }
     if (state === "error") {
-      // ACP has no explicit "server_error" stop reason.  Use "end_turn" so clients
-      // do not treat transient backend errors (timeouts, rate-limits) as deliberate
-      // refusals.  TODO: when ChatEventSchema gains a structured errorKind field
-      // (e.g. "refusal" | "timeout" | "rate_limit"), use it to distinguish here.
-      void this.finishPrompt(pending.sessionId, pending, "end_turn");
+      const errorKind = payload.errorKind as string | undefined;
+      const errorMessage = typeof payload.error === "string" ? payload.error : "Gateway chat error";
+      if (errorKind === "refusal") {
+        // For model refusals, we still want to resolve the turn so the client can see
+        // any refusal content already emitted.
+        void this.finishPrompt(pending.sessionId, pending, "end_turn");
+      } else {
+        // For transient errors (timeout, rate-limit, capacity), reject the pending
+        // prompt so the ACP client receives a protocol-level error response.
+        this.rejectPendingPrompt(
+          pending,
+          new Error(`${errorMessage}${errorKind ? ` (${errorKind})` : ""}`),
+        );
+      }
     }
   }
 

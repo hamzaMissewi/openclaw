@@ -26,18 +26,18 @@ describe("ACP install hints", () => {
     expect(resolveAcpInstallCommandHint(cfg)).toBe("pnpm openclaw plugins install acpx");
   });
 
-  it("uses local acpx extension path when present", () => {
+  it("uses local acpx plugin path when present", () => {
     const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "acp-install-hint-"));
     tempDirs.push(tempRoot);
-    fs.mkdirSync(path.join(tempRoot, "extensions", "acpx"), { recursive: true });
+    fs.mkdirSync(path.join(tempRoot, "plugins", "acpx"), { recursive: true });
     vi.spyOn(process, "cwd").mockReturnValue(tempRoot);
 
     const cfg = withAcpConfig({ backend: "acpx" });
     const hint = resolveAcpInstallCommandHint(cfg);
-    expect(hint).toBe(`openclaw plugins install ${path.join(tempRoot, "extensions", "acpx")}`);
+    expect(hint).toBe(`openclaw plugins install ${path.join(tempRoot, "plugins", "acpx")}`);
   });
 
-  it("falls back to scoped install hint for acpx when local extension is absent", () => {
+  it("falls back to scoped install hint for acpx when local plugin is absent", () => {
     const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "acp-install-hint-"));
     tempDirs.push(tempRoot);
     vi.spyOn(process, "cwd").mockReturnValue(tempRoot);
